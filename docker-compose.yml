@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: rp-gpio-api
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/gpiomem:/dev/gpiomem
+      - /dev/gpiochip0:/dev/gpiochip0
+    environment:
+      - PYTHONUNBUFFERED=1
+    expose:
+      - "5000"
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        API_URL: http://api:5000
+    container_name: rp-gpio-web
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:3000"
+    environment:
+      - API_URL=http://api:5000
+    depends_on:
+      - api
