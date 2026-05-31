@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply h-full antialiased;
+  }
+
+  body {
+    @apply min-h-full bg-slate-100 text-slate-800 dark:bg-surface dark:text-slate-100;
+  }
+}
+
+@layer components {
+  .pin-label {
+    @apply truncate text-[11px] font-medium leading-tight tracking-wide;
+  }
+
+  .pin-num {
+    @apply font-mono text-[10px] font-semibold tabular-nums;
+  }
+}
