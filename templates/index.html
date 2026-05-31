@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Bek kobro">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gpio-control-style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins&display=swap">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <title>RP GPIO Control</title>
+</head>
+
+<body>
+    <nav>
+        <p>Raspberry Pi GPIO Control</p>
+        <ul class="nav-links">
+            <li><a class="nav nav-tab active" href="#gpiocontrol" data-view="gpiocontrol">GPIO</a></li>
+            <li><a class="nav nav-tab" href="#settings" data-view="settings">Settings</a></li>
+            <li><a class="nav nav-tab" href="#about" data-view="about">About</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div id="gpiocontrol" class="card-view panel view-panel view-active gpio-panel" data-view="gpiocontrol">
+            <div class="gpio-toolbar">
+                <h2>GPIO</h2>
+                <div class="gpio-legend">
+                    <span class="legend-chip legend-high">High</span>
+                    <span class="legend-chip legend-low">Low</span>
+                </div>
+                <button id="btRefresh" class="tkd-button gpio-refresh" onclick="refresh()">refresh</button>
+            </div>
+            <div class="grid gpio-grid">
+                <div class="card-view-item disabled">
+                    <div class="grid-2-left">
+                        <button class="tkd-button pins disabled">3V3 power</button>
+                        <p class="p-pins disabled">1</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">2</p>
+                        <button class="tkd-button pins disabled">5V power</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b2" class="tkd-button pins a-style-1" onclick="gpio(2)">GPIO 2 (SDA)</button>
+                        <p id="p2" class="p-pins">3</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">4</p>
+                        <button class="tkd-button pins disabled">5V power</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b3" class="tkd-button pins a-style-1" onclick="gpio(3)">GPIO 3 (SCL)</button>
+                        <p id="p3" class="p-pins">5</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">6</p>
+                        <button class="tkd-button pins disabled">Ground</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b4" class="tkd-button pins a-style-1" onclick="gpio(4)">GPIO 4 (GPCLK0)</button>
+                        <p id="p4" class="p-pins">7</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p14" class="p-pins">8</p>
+                        <button id="b14" class="tkd-button pins a-style-1" onclick="gpio(14)">GPIO 14 (TXD)</button>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-left">
+                        <button class="tkd-button pins disabled">Ground</button>
+                        <p class="p-pins disabled">9</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p15" class="p-pins">10</p>
+                        <button id="b15" class="tkd-button pins a-style-1" onclick="gpio(15)">GPIO 15 (RXD)</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b17" class="tkd-button pins a-style-1" onclick="gpio(17)">GPIO 17</button>
+                        <p id="p17" class="p-pins">11</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p18" class="p-pins">12</p>
+                        <button id="b18" class="tkd-button pins a-style-1" onclick="gpio(18)">GPIO 18 (PCM_CLK)</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b27" class="tkd-button pins a-style-1" onclick="gpio(27)">GPIO 27</button>
+                        <p id="p27" class="p-pins">13</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">14</p>
+                        <button class="tkd-button pins disabled">Ground</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b22" class="tkd-button pins a-style-1" onclick="gpio(22)">GPIO 22</button>
+                        <p id="p22" class="p-pins">15</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p23" class="p-pins">16</p>
+                        <button id="b23" class="tkd-button pins a-style-1" onclick="gpio(23)">GPIO 23</button>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-left">
+                        <button class="tkd-button pins disabled">3V3 power</button>
+                        <p class="p-pins disabled">17</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p24" class="p-pins">18</p>
+                        <button id="b24" class="tkd-button pins a-style-1" onclick="gpio(24)">GPIO 24</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b10" class="tkd-button pins a-style-1" onclick="gpio(10)">GPIO 10 (MOSI)</button>
+                        <p id="p10" class="p-pins">19</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">20</p>
+                        <button class="tkd-button pins disabled">Ground</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b9" class="tkd-button pins a-style-1" onclick="gpio(9)">GPIO 9 (MISO)</button>
+                        <p id="p9" class="p-pins">21</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p25" class="p-pins">22</p>
+                        <button id="b25" class="tkd-button pins a-style-1" onclick="gpio(25)">GPIO 25</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b11" class="tkd-button pins a-style-1" onclick="gpio(11)">GPIO 11 (SCLK)</button>
+                        <p id="p11" class="p-pins">23</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p8" class="p-pins">24</p>
+                        <button id="b8" class="tkd-button pins a-style-1" onclick="gpio(8)">GPIO 8 (CE0)</button>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-left">
+                        <button class="tkd-button pins disabled">Ground</button>
+                        <p class="p-pins disabled">25</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p7" class="p-pins">26</p>
+                        <button id="b7" class="tkd-button pins a-style-1" onclick="gpio(7)">GPIO 7 (CE1)</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b0" class="tkd-button pins a-style-1" onclick="gpio(0)">GPIO 0 (ID_SD)</button>
+                        <p id="p0" class="p-pins">27</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p1" class="p-pins">28</p>
+                        <button id="b1" class="tkd-button pins a-style-1" onclick="gpio(1)">GPIO 1 (ID_SD)</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b5" class="tkd-button pins a-style-1" onclick="gpio(5)">GPIO 5</button>
+                        <p id="p5" class="p-pins">29</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">30</p>
+                        <button class="tkd-button pins disabled">Ground</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b6" class="tkd-button pins a-style-1" onclick="gpio(6)">GPIO 6</button>
+                        <p id="p6" class="p-pins">31</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p12" class="p-pins">32</p>
+                        <button id="b12" class="tkd-button pins a-style-1" onclick="gpio(12)">GPIO 12 (PWM0)</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b13" class="tkd-button pins a-style-1" onclick="gpio(13)">GPIO 13 (PWM1)</button>
+                        <p id="p13" class="p-pins">33</p>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-right">
+                        <p class="p-pins disabled">34</p>
+                        <button class="tkd-button pins disabled">Ground</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b19" class="tkd-button pins a-style-1" onclick="gpio(19)">GPIO 19 (PCM_FS)</button>
+                        <p id="p19" class="p-pins">35</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p16" class="p-pins">36</p>
+                        <button id="b16" class="tkd-button pins a-style-1" onclick="gpio(16)">GPIO 16</button>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-left">
+                        <button id="b26" class="tkd-button pins a-style-1" onclick="gpio(26)">GPIO 26</button>
+                        <p id="p26" class="p-pins">37</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p20" class="p-pins">38</p>
+                        <button id="b20" class="tkd-button pins a-style-1" onclick="gpio(20)">GPIO 20 (PCM_DIN)</button>
+                    </div>
+                </div>
+                <div class="card-view-item disabled">
+                    <div class="grid-2-left">
+                        <button class="tkd-button pins disabled">Ground</button>
+                        <p class="p-pins disabled">39</p>
+                    </div>
+                </div>
+                <div class="card-view-item">
+                    <div class="grid-2-right">
+                        <p id="p21" class="p-pins">40</p>
+                        <button id="b21" class="tkd-button pins a-style-1" onclick="gpio(21)">GPIO 21 (PCM_DOUT)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings" class="card-view panel view-panel" data-view="settings" hidden>
+            <h2>Settings</h2>
+            <div class="card-view-item padding-med margin-bottom">
+                <div class="grid-settings">
+                    <p class="small">Confermation Window</p>
+                    <label class="switch item-b">
+                        <input id="switchComfermationWindow" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="card-view-item padding-med margin-bottom">
+                <div class="grid-settings">
+                    <p class="small">Safety Mode</p>
+                    <label class="switch item-b">
+                        <input id="switchSecurityMode" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="light margin-med info">In this mode, each time the user changes a GPIO status, <br> the system checks if the displayed status is the real one.</p>
+            </div>
+            <div class="card-view-item padding-med margin-bottom">
+                <div class="grid-settings">
+                    <p class="small">Refresh after GPIO status change</p>
+                    <label class="switch item-b">
+                        <input id="switchAutoUpdateStates" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="light margin-med info">After a GPIO status change made by the user on this website, <br> the GPIO status display is updated. </p>
+            </div>
+            <div class="card-view-item padding-med margin-bottom">
+                <div class="grid-settings">
+                    <p class="small">Dark Mode</p>
+                    <label class="switch item-b">
+                        <input id="switchDarkMode" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card-view-item padding-med margin-bottom">
+                <p class="small">Source of GPIO pin numbering:</p>
+                <a class="p-card-view-item" href="https://www.raspberrypi.org/documentation/usage/gpio/README.md">https://www.raspberrypi.org/documentation/usage/gpio/README.md</a>
+            </div>
+            <div class="card-view-item padding-med">
+                <p class="light">Run this Python/Flask app on the Raspberry Pi (native or Docker) <br>
+                    WiringPi CLI or lgpio library for GPIO access <br>
+                    use Raspberry Pi OS (Raspbian) <br>
+                    JavaScript must be enabled on this website
+                </p>
+                <div class="flex-center">
+                    <a class="margin-small" href="https://www.raspberrypi.org/documentation/remote-access/web-server/apache.md">instructions from raspberrypi.org</a>
+                </div>
+            </div>
+        </div>
+
+        <section id="about" class="card-view panel view-panel about-panel" data-view="about" hidden>
+            <h2>About</h2>
+            <div class="about-hero">
+                <p class="about-lead">
+                    Python rewrite by <strong>Bek kobro</strong>, customized from the original PHP web UI for modern Raspberry Pi OS.
+                </p>
+                <div class="about-tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">Flask</span>
+                    <span class="tag">Docker</span>
+                    <span class="tag">lgpio</span>
+                </div>
+            </div>
+            <div class="card-view-item padding-med about-card">
+                <h3 class="about-subtitle">Origin</h3>
+                <p class="light">
+                    Forked from
+                    <a href="https://github.com/timkn/Raspberry-Pi-GPIO-Control" target="_blank" rel="noopener">timkn/Raspberry-Pi-GPIO-Control</a>
+                    by TK (2020) — a PHP + WiringPi project for browser-based GPIO control.
+                </p>
+            </div>
+            <div class="card-view-item padding-med about-card">
+                <h3 class="about-subtitle">This version</h3>
+                <p class="light">
+                    Flask serves the UI; Python drives GPIO via WiringPi CLI or lgpio.
+                    jQuery and Ajax handle live pin state updates from any device on your LAN.
+                </p>
+            </div>
+            <div class="card-view-item padding-med about-card">
+                <h3 class="about-subtitle">Pin numbering</h3>
+                <p class="light">
+                    <a href="https://www.raspberrypi.org/documentation/usage/gpio/README.md" target="_blank" rel="noopener">Raspberry Pi GPIO documentation</a>
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <span class="footer-author">Bek kobro</span>
+            <span class="footer-dot" aria-hidden="true"></span>
+            <a class="footer-link" href="https://github.com/timkn/Raspberry-Pi-GPIO-Control" target="_blank" rel="noopener">timkn/Raspberry-Pi-GPIO-Control</a>
+            <span class="footer-dot" aria-hidden="true"></span>
+            <span class="footer-muted">without guarantee</span>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/gpio-control.js') }}"></script>
+</body>
+
+</html>
