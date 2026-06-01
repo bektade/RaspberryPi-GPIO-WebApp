@@ -28,12 +28,6 @@ Next.js -> Flaks GPIO API -> [RaspberryPi GPIO interface -> Relay Module -> Fiel
 ```
 
 
-
-
-```bash
-make help
-```
-
 ## Quick start
 
 
@@ -51,6 +45,11 @@ make dev         # local — API :5000 + Next.js :3000 (needs npm install in fro
 
 # finally 
 # http://\<pi-ip\>:8080
+
+
+
+# help
+make help
 ```
 
 
