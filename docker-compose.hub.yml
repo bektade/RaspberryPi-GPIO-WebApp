@@ -1,9 +1,7 @@
+# Pull-and-run only — no local build. Use after images are published to Docker Hub.
 services:
   api:
     image: ${DOCKER_USER:-becktkh}/rp-gpio-api:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile.api
     container_name: rp-gpio-api
     restart: unless-stopped
     privileged: true
@@ -17,10 +15,6 @@ services:
 
   web:
     image: ${DOCKER_USER:-becktkh}/rp-gpio-web:${TAG:-latest}
-    build:
-      context: ./frontend
-      args:
-        API_URL: http://api:5000
     container_name: rp-gpio-web
     restart: unless-stopped
     ports:

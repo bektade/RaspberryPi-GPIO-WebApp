@@ -1,24 +1,33 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-PORT       ?= 8080
-API_PORT   ?= 5000
-WEB_PORT   ?= 3000
-VENV       := .venv
-PYTHON     := $(VENV)/bin/python
-PIP        := $(VENV)/bin/pip
-COMPOSE    := docker compose
-API_SVC    := api
-WEB_SVC    := web
+PORT         ?= 8080
+API_PORT     ?= 5000
+WEB_PORT     ?= 3000
+DOCKER_USER  ?= becktkh
+TAG          ?= latest
+VENV         := .venv
+PYTHON       := $(VENV)/bin/python
+PIP          := $(VENV)/bin/pip
+COMPOSE      := docker compose
+COMPOSE_HUB  := $(COMPOSE) -f docker-compose.hub.yml
+API_SVC      := api
+WEB_SVC      := web
+API_IMAGE    := $(DOCKER_USER)/rp-gpio-api:$(TAG)
+WEB_IMAGE    := $(DOCKER_USER)/rp-gpio-web:$(TAG)
+
+export DOCKER_USER TAG PORT
 
 .PHONY: help install dev api web test build up down restart logs ps url check clean
+.PHONY: hub-up hub-down hub-pull publish login push tag-images
 
 help: ## Show commands
 	@printf "\n  \033[1mGPIO Control\033[0m — Next.js + Flask\n\n"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 	@printf "\n  UI   → http://localhost:$(PORT)\n"
-	@printf "  API  → http://localhost:$(API_PORT)/api/gpio\n\n"
+	@printf "  API  → http://localhost:$(API_PORT)/api/gpio\n"
+	@printf "  Hub  → $(DOCKER_USER)/rp-gpio-api:$(TAG)\n\n"
 
 install: $(VENV)/bin/python ## Install Python deps
 	$(PIP) install -q -r requirements.txt
@@ -58,12 +67,34 @@ print('  \033[32m✓\033[0m API checks passed')")
 build: ## Build Docker images
 	$(COMPOSE) build
 
-up: ## Start stack (detached)
+up: ## Start stack (build locally if needed)
 	PORT=$(PORT) $(COMPOSE) up -d --build
 	@$(MAKE) --no-print-directory url
 
+hub-pull: ## Pull pre-built images from Docker Hub
+	$(COMPOSE_HUB) pull
+
+hub-up: ## Pull images and start (no local build)
+	$(COMPOSE_HUB) pull
+	PORT=$(PORT) $(COMPOSE_HUB) up -d
+	@$(MAKE) --no-print-directory url
+
+hub-down: ## Stop pull-only stack
+	$(COMPOSE_HUB) down
+
+login: ## Log in to Docker Hub (required before publish)
+	docker login
+
+publish: build ## Build and push both images to Docker Hub
+	$(COMPOSE) push
+	@printf "  \033[32m✓\033[0m pushed $(API_IMAGE)\n"
+	@printf "  \033[32m✓\033[0m pushed $(WEB_IMAGE)\n"
+
+push: publish ## Alias for publish
+
 down: ## Stop stack
 	$(COMPOSE) down
+	$(COMPOSE_HUB) down 2>/dev/null || true
 
 restart: down up ## Restart stack
 
