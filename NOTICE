@@ -1,0 +1,11 @@
+Raspberry Pi GPIO Control (Python / Next.js port)
+
+Copyright 2026 Bek Kobro
+https://bekcsys.com/
+
+This project is a derivative work based on:
+  timkn/Raspberry-Pi-GPIO-Control
+  Copyright 2020 timkn
+  https://github.com/timkn/Raspberry-Pi-GPIO-Control
+
+Licensed under the Apache License, Version 2.0.
