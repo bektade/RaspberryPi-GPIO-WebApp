@@ -20,7 +20,7 @@ export DOCKER_USER TAG PORT
 
 help: ## Show commands
 	@printf "\n  \033[1mGPIO Control\033[0m — Next.js + Flask\n\n"
-	@rg -N '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 	@printf "\n  UI   → http://localhost:$(PORT)\n"
 	@printf "  API  → http://localhost:$(API_PORT)/api/gpio\n"
@@ -28,7 +28,7 @@ help: ## Show commands
 
 install: $(VENV)/bin/python ## Install Python deps
 	$(PIP) install -q -r requirements.txt
-	@if uname -m | rg -q 'aarch64|armv7l'; then \
+	@if uname -m | grep -qE 'aarch64|armv7l'; then \
 		$(PIP) install -q lgpio 2>/dev/null || true; \
 	fi
 
@@ -111,7 +111,7 @@ url: ## Print LAN URL
 	printf "  \033[32m→\033[0m http://$${host:-localhost}:$(PORT)\n"
 
 check: ## Verify GPIO group (native API)
-	@if groups | rg -q '\bgpio\b'; then \
+	@if groups | grep -q '\bgpio\b'; then \
 		printf "  \033[32m✓\033[0m user in gpio group\n"; \
 	else \
 		printf "  \033[33m!\033[0m add user: sudo usermod -aG gpio $$USER\n"; \
