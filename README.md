@@ -14,8 +14,8 @@ This project was developed to rapidly validate GPIO-based control logic for a Bu
 This tool provides a simple way to verify end-to-end operation between software commands, Raspberry Pi GPIO outputs, relay states, and connected field devices.
 
 ![Setup](/python-gpio-control/doc/Setup.png)
-![Live Grafana dashboard](/python-gpio-control/doc/gpio.png)
-![Live Grafana dashboard](/python-gpio-control/doc/gpio2.png)
+![screenshot1](/python-gpio-control/doc/gpio.png)
+![screenshot2](/python-gpio-control/doc/gpio2.png)
 
 ## How ? (implementation Details)
 
