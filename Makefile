@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-PORT         ?= 8080
+PORT         ?= 8090
 API_PORT     ?= 5000
 WEB_PORT     ?= 3000
 DOCKER_USER  ?= becktkh
@@ -16,11 +16,11 @@ IMAGE        := $(DOCKER_USER)/rp-gpio:$(TAG)
 export DOCKER_USER TAG PORT
 
 .PHONY: help install dev api web test build up down restart logs ps url check clean
-.PHONY: hub-up hub-down hub-pull publish login push tag-images
+.PHONY: hub-up hub-down hub-pull publish login push rebuild
 
 help: ## Show commands
 	@printf "\n  \033[1mGPIO Control\033[0m — Next.js + Flask\n\n"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	@rg -N '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 	@printf "\n  UI   → http://localhost:$(PORT)\n"
 	@printf "  API  → http://localhost:$(API_PORT)/api/gpio\n"
@@ -28,7 +28,7 @@ help: ## Show commands
 
 install: $(VENV)/bin/python ## Install Python deps
 	$(PIP) install -q -r requirements.txt
-	@if uname -m | grep -qE 'aarch64|armv7l'; then \
+	@if uname -m | rg -q 'aarch64|armv7l'; then \
 		$(PIP) install -q lgpio 2>/dev/null || true; \
 	fi
 
@@ -61,17 +61,23 @@ assert c.get('/api/gpio?gpiostateall=').status_code == 200; \
 assert c.get('/health').status_code == 200; \
 print('  \033[32m✓\033[0m API checks passed')")
 
-build: ## Build Docker images
+build: ## Build Docker image
 	$(COMPOSE) build
 
 up: ## Start stack (build locally if needed)
 	PORT=$(PORT) $(COMPOSE) up -d --build
 	@$(MAKE) --no-print-directory url
 
-hub-pull: ## Pull pre-built images from Docker Hub
+rebuild: ## Rebuild image from scratch and restart container
+	PORT=$(PORT) $(COMPOSE) down
+	PORT=$(PORT) $(COMPOSE) build --no-cache
+	PORT=$(PORT) $(COMPOSE) up -d --force-recreate
+	@$(MAKE) --no-print-directory url
+
+hub-pull: ## Pull pre-built image from Docker Hub
 	$(COMPOSE_HUB) pull
 
-hub-up: ## Pull images and start (no local build)
+hub-up: ## Pull image and start (no local build)
 	$(COMPOSE_HUB) pull
 	PORT=$(PORT) $(COMPOSE_HUB) up -d
 	@$(MAKE) --no-print-directory url
@@ -105,7 +111,7 @@ url: ## Print LAN URL
 	printf "  \033[32m→\033[0m http://$${host:-localhost}:$(PORT)\n"
 
 check: ## Verify GPIO group (native API)
-	@if groups | grep -q '\bgpio\b'; then \
+	@if groups | rg -q '\bgpio\b'; then \
 		printf "  \033[32m✓\033[0m user in gpio group\n"; \
 	else \
 		printf "  \033[33m!\033[0m add user: sudo usermod -aG gpio $$USER\n"; \
