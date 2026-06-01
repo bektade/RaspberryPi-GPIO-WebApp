@@ -36,54 +36,25 @@ make help
 
 ## Quick start
 
-### Pull and run (Docker Hub — recommended on Raspberry Pi)
-
-No clone or build required after images are published:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bektade/RaspberryPi-GPIO-WebApp/master/python-gpio-control/scripts/hub-run.sh | bash
-```
+# clone Repo
 
-Or from a clone:
-
-```bash
 cp .env.example .env    # set DOCKER_USER to your Docker Hub namespace
 make hub-up             # pull images and start
-```
 
-Open **http://\<pi-ip\>:8080**
 
-Default images: `becktkh/rp-gpio-api:latest` and `becktkh/rp-gpio-web:latest`
 
-Installs to `~/.rp-gpio-control/` when using the curl script.
-
-### Build from source
-
-```bash
+# build from source 
 make up          # Docker — Next.js on :8080, Flask API internal
 make dev         # local — API :5000 + Next.js :3000 (needs npm install in frontend/)
+
+# finally 
+# http://\<pi-ip\>:8080
 ```
 
-To build and push images to Docker Hub, see **[README-DOCKER-HUB.md](README-DOCKER-HUB.md)**.
 
-## Stack
 
-| Layer | Tech |
-|-------|------|
-| UI | Next.js 15, React, Tailwind |
-| API | Flask, lgpio / WiringPi |
-| Deploy | Docker Compose |
-
-## Dev setup
-
-```bash
-make install
-cd frontend && npm install
-make dev
-```
-
-- UI → http://localhost:3000  
-- API → http://localhost:5000/api/gpio  
 
 ## API
 
@@ -109,3 +80,8 @@ python-gpio-control/
 
 **Author:** [Bek Kobro](https://bekcsys.com/)  
 **License:** [Apache License 2.0](LICENSE)
+
+---
+More :
+
+ **[README-DOCKER-HUB.md](README-DOCKER-HUB.md)**.
