@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import threading
 from typing import Optional
 
 GPIO_COUNT = 29
+_lock = threading.Lock()
 _chip_handle: Optional[int] = None
 _lgpio_module = None
 _output_pins: set[int] = set()
@@ -50,6 +52,7 @@ def _lgpio_free(gpio: int) -> None:
         return
     try:
         lgpio.gpio_free(handle, gpio)
+        _output_pins.discard(gpio)
     except lgpio.error:
         pass
 
@@ -60,13 +63,12 @@ def _lgpio_read(gpio: int) -> int:
     if handle is None:
         return 0
     try:
-        if gpio in _output_pins:
-            return lgpio.gpio_read(handle, gpio)
-        try:
-            lgpio.gpio_claim_input(handle, gpio, lgpio.SET_PULL_NONE)
-        except lgpio.error:
-            pass
-        return lgpio.gpio_read(handle, gpio)
+        if gpio not in _output_pins:
+            try:
+                lgpio.gpio_claim_input(handle, gpio, lgpio.SET_PULL_NONE)
+            except lgpio.error:
+                pass
+        return 1 if lgpio.gpio_read(handle, gpio) else 0
     except lgpio.error:
         return 0
 
@@ -77,16 +79,24 @@ def _lgpio_write(gpio: int, state: int) -> int:
     if handle is None:
         return state
     try:
-        _lgpio_free(gpio)
-        lgpio.gpio_claim_output(handle, gpio, lgpio.SET_PULL_NONE)
-        _output_pins.add(gpio)
+        if gpio not in _output_pins:
+            _lgpio_free(gpio)
+            lgpio.gpio_claim_output(handle, gpio, lgpio.SET_PULL_NONE)
+            _output_pins.add(gpio)
         lgpio.gpio_write(handle, gpio, state)
-        return lgpio.gpio_read(handle, gpio)
+        return 1 if lgpio.gpio_read(handle, gpio) else 0
     except lgpio.error:
-        return state
+        try:
+            _lgpio_free(gpio)
+            lgpio.gpio_claim_output(handle, gpio, lgpio.SET_PULL_NONE)
+            _output_pins.add(gpio)
+            lgpio.gpio_write(handle, gpio, state)
+            return 1 if lgpio.gpio_read(handle, gpio) else 0
+        except lgpio.error:
+            return state
 
 
-def get_gpio_state(gpio: int) -> int:
+def _get_gpio_state_unlocked(gpio: int) -> int:
     if _wiringpi_available():
         result = subprocess.run(
             ["gpio", "-g", "read", str(gpio)],
@@ -103,9 +113,8 @@ def get_gpio_state(gpio: int) -> int:
     return 0
 
 
-def set_gpio_state(gpio: int, state: int) -> int:
+def _set_gpio_state_unlocked(gpio: int, state: int) -> int:
     state = 1 if state else 0
-
     if _wiringpi_available():
         subprocess.run(
             ["gpio", "-g", "mode", str(gpio), "out"],
@@ -117,7 +126,7 @@ def set_gpio_state(gpio: int, state: int) -> int:
             capture_output=True,
             check=False,
         )
-        return get_gpio_state(gpio)
+        return _get_gpio_state_unlocked(gpio)
 
     if _lgpio_available():
         return _lgpio_write(gpio, state)
@@ -125,19 +134,30 @@ def set_gpio_state(gpio: int, state: int) -> int:
     return state
 
 
+def get_gpio_state(gpio: int) -> int:
+    with _lock:
+        return _get_gpio_state_unlocked(gpio)
+
+
+def set_gpio_state(gpio: int, state: int) -> int:
+    with _lock:
+        return _set_gpio_state_unlocked(gpio, state)
+
+
 def get_all_gpio_states() -> dict[int, int]:
-    return {i: get_gpio_state(i) for i in range(GPIO_COUNT)}
+    with _lock:
+        return {i: _get_gpio_state_unlocked(i) for i in range(GPIO_COUNT)}
 
 
 def close() -> None:
-    global _chip_handle, _output_pins
-    if _chip_handle is not None and _lgpio_available():
-        lgpio = _lgpio()
-        for gpio in list(_output_pins):
-            _lgpio_free(gpio)
-        _output_pins.clear()
-        try:
-            lgpio.gpiochip_close(_chip_handle)
-        except Exception:
-            pass
-        _chip_handle = None
+    global _chip_handle
+    with _lock:
+        if _chip_handle is not None and _lgpio_available():
+            lgpio = _lgpio()
+            for gpio in list(_output_pins):
+                _lgpio_free(gpio)
+            try:
+                lgpio.gpiochip_close(_chip_handle)
+            except Exception:
+                pass
+            _chip_handle = None
