@@ -1,8 +1,7 @@
-# Pull-and-run only — no local build. Use after images are published to Docker Hub.
 services:
-  api:
-    image: ${DOCKER_USER:-becktkh}/rp-gpio-api:${TAG:-latest}
-    container_name: rp-gpio-api
+  gpio:
+    image: ${DOCKER_USER:-becktkh}/rp-gpio:${TAG:-latest}
+    container_name: rp-gpio
     restart: unless-stopped
     privileged: true
     devices:
@@ -10,16 +9,6 @@ services:
       - /dev/gpiochip0:/dev/gpiochip0
     environment:
       - PYTHONUNBUFFERED=1
-    expose:
-      - "5000"
-
-  web:
-    image: ${DOCKER_USER:-becktkh}/rp-gpio-web:${TAG:-latest}
-    container_name: rp-gpio-web
-    restart: unless-stopped
+      - API_URL=http://127.0.0.1:5000
     ports:
       - "${PORT:-8080}:3000"
-    environment:
-      - API_URL=http://api:5000
-    depends_on:
-      - api

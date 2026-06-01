@@ -11,10 +11,7 @@ PYTHON       := $(VENV)/bin/python
 PIP          := $(VENV)/bin/pip
 COMPOSE      := docker compose
 COMPOSE_HUB  := $(COMPOSE) -f docker-compose.hub.yml
-API_SVC      := api
-WEB_SVC      := web
-API_IMAGE    := $(DOCKER_USER)/rp-gpio-api:$(TAG)
-WEB_IMAGE    := $(DOCKER_USER)/rp-gpio-web:$(TAG)
+IMAGE        := $(DOCKER_USER)/rp-gpio:$(TAG)
 
 export DOCKER_USER TAG PORT
 
@@ -27,7 +24,7 @@ help: ## Show commands
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 	@printf "\n  UI   → http://localhost:$(PORT)\n"
 	@printf "  API  → http://localhost:$(API_PORT)/api/gpio\n"
-	@printf "  Hub  → $(DOCKER_USER)/rp-gpio-api:$(TAG)\n\n"
+	@printf "  Hub  → $(IMAGE)\n\n"
 
 install: $(VENV)/bin/python ## Install Python deps
 	$(PIP) install -q -r requirements.txt
@@ -85,10 +82,9 @@ hub-down: ## Stop pull-only stack
 login: ## Log in to Docker Hub (required before publish)
 	docker login
 
-publish: build ## Build and push both images to Docker Hub
+publish: build ## Build and push image to Docker Hub
 	$(COMPOSE) push
-	@printf "  \033[32m✓\033[0m pushed $(API_IMAGE)\n"
-	@printf "  \033[32m✓\033[0m pushed $(WEB_IMAGE)\n"
+	@printf "  \033[32m✓\033[0m pushed $(IMAGE)\n"
 
 push: publish ## Alias for publish
 

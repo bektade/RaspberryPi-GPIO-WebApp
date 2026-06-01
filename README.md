@@ -71,7 +71,7 @@ python-gpio-control/
 ├── app.py             Flask API
 ├── gpio_backend.py
 ├── docker-compose.yml
-├── Dockerfile.api
+├── Dockerfile
 └── Makefile
 ```
 
@@ -83,4 +83,4 @@ python-gpio-control/
 ---
 More :
 
- **[README-DOCKER-HUB.md](README-DOCKER-HUB.md)**.
+ **[doc/README-DOCKER-HUB.md](doc/README-DOCKER-HUB.md)**.

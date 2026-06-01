@@ -14,10 +14,10 @@ export DOCKER_USER TAG PORT
 
 cd "$INSTALL_DIR"
 
-echo "Pulling ${DOCKER_USER}/rp-gpio-api:${TAG} and ${DOCKER_USER}/rp-gpio-web:${TAG} ..."
+echo "Pulling ${DOCKER_USER}/rp-gpio:${TAG} ..."
 docker compose -f docker-compose.hub.yml pull
 
-echo "Starting GPIO control stack on port ${PORT} ..."
+echo "Starting on port ${PORT} ..."
 docker compose -f docker-compose.hub.yml up -d
 
 host="$(hostname -I 2>/dev/null | awk '{print $1}')"
