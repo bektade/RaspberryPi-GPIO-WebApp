@@ -8,6 +8,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 export const metadata: Metadata = {
   title: "RP GPIO Control",
   description: "Raspberry Pi GPIO control — Python + Next.js by Bek Kobro",
+  authors: [{ name: "Bek Kobro", url: "https://bekcsys.com/" }],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

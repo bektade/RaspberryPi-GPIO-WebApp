@@ -164,6 +164,15 @@ export function GpioApp() {
             bekcsys.com
           </a>
           <span className="text-slate-300 dark:text-slate-700">·</span>
+          <a
+            href="https://www.apache.org/licenses/LICENSE-2.0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
+          >
+            Apache 2.0
+          </a>
+          <span className="text-slate-300 dark:text-slate-700">·</span>
           <span className="text-slate-400">without guarantee</span>
         </div>
       </footer>

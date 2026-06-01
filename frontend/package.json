@@ -2,6 +2,8 @@
   "name": "gpio-control-web",
   "version": "1.0.0",
   "private": true,
+  "author": "Bek Kobro <https://bekcsys.com/>",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
