@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    @apply h-full antialiased;
+    @apply h-full scroll-smooth antialiased;
   }
 
   body {
@@ -13,11 +13,11 @@
 }
 
 @layer components {
-  .pin-label {
-    @apply truncate text-[11px] font-medium leading-tight tracking-wide;
+  .pin-cell {
+    @apply h-14 min-h-[3.5rem];
   }
 
-  .pin-num {
-    @apply font-mono text-[10px] font-semibold tabular-nums;
+  .pin-badge {
+    @apply font-mono;
   }
 }

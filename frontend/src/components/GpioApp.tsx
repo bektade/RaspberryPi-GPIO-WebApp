@@ -5,18 +5,9 @@ import { AboutPanel } from "@/components/AboutPanel";
 import { PinBoard } from "@/components/PinBoard";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { fetchAllStates, fetchPinState, setPinState } from "@/lib/gpio-api";
-import { DEFAULT_SETTINGS, type AppSettings, type GpioStates } from "@/lib/pins";
-
-type Tab = "gpio" | "settings" | "about";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "gpio", label: "GPIO" },
-  { id: "settings", label: "Settings" },
-  { id: "about", label: "About" },
-];
+import { DEFAULT_SETTINGS, BCM_GPIO_PINS, type AppSettings, type GpioStates } from "@/lib/pins";
 
 export function GpioApp() {
-  const [tab, setTab] = useState<Tab>("gpio");
   const [states, setStates] = useState<GpioStates>({});
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [refreshing, setRefreshing] = useState(false);
@@ -73,45 +64,88 @@ export function GpioApp() {
     }
   };
 
+  const setAllGpio = async (state: 0 | 1) => {
+    try {
+      const label = state === 1 ? "ON (HIGH)" : "OFF (LOW)";
+      if (settings.confirmation && !confirm(`Turn ALL GPIO pins ${label}?`)) return;
+
+      for (const bcm of BCM_GPIO_PINS) {
+        const verified = await setPinState(bcm, state);
+        setStates((prev) => ({ ...prev, [bcm]: verified }));
+      }
+
+      await loadAll();
+    } catch {
+      alert("Error when GPIO states were changed.");
+    }
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md dark:border-surface-border dark:bg-surface/90">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md dark:border-surface-border dark:bg-surface/95">
+        <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div>
-            <p className="text-sm font-semibold tracking-wide text-slate-800 dark:text-white">
-              Raspberry Pi GPIO
-            </p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500">BCM numbering · tap to toggle relays</p>
+            <p className="text-base font-semibold text-slate-800 dark:text-white">Raspberry Pi GPIO</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">40-pin header · BCM · relay control</p>
           </div>
-          <nav className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-surface-border dark:bg-surface-raised">
-            {TABS.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setTab(id)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                  tab === id
-                    ? "bg-blue-500 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <nav className="flex flex-wrap items-center gap-2 text-xs font-medium">
+            <a href="#gpio" className="rounded-md px-2 py-1 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-surface-raised xl:hidden">
+              GPIO
+            </a>
+            <a href="#settings" className="rounded-md px-2 py-1 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-surface-raised xl:hidden">
+              Settings
+            </a>
+            <a href="#about" className="rounded-md px-2 py-1 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-surface-raised xl:hidden">
+              About
+            </a>
+            <a
+              href="https://bekcsys.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden text-blue-600 hover:underline sm:inline dark:text-blue-400"
+            >
+              bekcsys.com
+            </a>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-4">
-        {tab === "gpio" && (
-          <PinBoard states={states} onToggle={togglePin} onRefresh={loadAll} refreshing={refreshing} />
-        )}
-        {tab === "settings" && <SettingsPanel settings={settings} onChange={patchSettings} />}
-        {tab === "about" && <AboutPanel />}
+      <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-5 sm:px-6 sm:py-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12 xl:gap-8">
+          <aside
+            id="settings"
+            className="order-2 xl:order-1 xl:col-span-3 xl:sticky xl:top-[4.5rem] xl:self-start xl:max-h-[calc(100vh-5.5rem)] xl:overflow-y-auto"
+          >
+            <PanelShell title="Settings">
+              <SettingsPanel settings={settings} onChange={patchSettings} />
+            </PanelShell>
+          </aside>
+
+          <section id="gpio" className="order-1 xl:order-2 xl:col-span-6">
+            <PanelShell title="GPIO Control">
+              <PinBoard
+                states={states}
+                onToggle={togglePin}
+                onSetAll={setAllGpio}
+                onRefresh={loadAll}
+                refreshing={refreshing}
+              />
+            </PanelShell>
+          </section>
+
+          <aside
+            id="about"
+            className="order-3 xl:col-span-3 xl:sticky xl:top-[4.5rem] xl:self-start xl:max-h-[calc(100vh-5.5rem)] xl:overflow-y-auto"
+          >
+            <PanelShell title="About">
+              <AboutPanel />
+            </PanelShell>
+          </aside>
+        </div>
       </main>
 
-      <footer className="mt-auto border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-surface-border dark:bg-surface">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+      <footer className="border-t border-slate-200 bg-slate-50 px-4 py-4 dark:border-surface-border dark:bg-surface">
+        <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
           <a
             href="https://bekcsys.com/"
             target="_blank"
@@ -120,7 +154,7 @@ export function GpioApp() {
           >
             Bek Kobro
           </a>
-          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">·</span>
+          <span className="text-slate-300 dark:text-slate-700">·</span>
           <a
             href="https://bekcsys.com/"
             target="_blank"
@@ -129,19 +163,21 @@ export function GpioApp() {
           >
             bekcsys.com
           </a>
-          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">·</span>
-          <a
-            href="https://github.com/timkn/Raspberry-Pi-GPIO-Control"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline dark:text-blue-400"
-          >
-            timkn/Raspberry-Pi-GPIO-Control
-          </a>
-          <span className="hidden sm:inline text-slate-300 dark:text-slate-700">·</span>
+          <span className="text-slate-300 dark:text-slate-700">·</span>
           <span className="text-slate-400">without guarantee</span>
         </div>
       </footer>
     </>
+  );
+}
+
+function PanelShell({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-surface-border dark:bg-surface/40 sm:p-5">
+      <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+        {title}
+      </h2>
+      {children}
+    </div>
   );
 }
