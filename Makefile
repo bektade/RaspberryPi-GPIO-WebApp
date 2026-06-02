@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL         := /bin/bash
 
-PORT         ?= 8090
+PORT         ?= 8091
 API_PORT     ?= 5000
 WEB_PORT     ?= 3000
 DOCKER_USER  ?= becktkh

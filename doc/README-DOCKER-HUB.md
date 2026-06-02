@@ -10,7 +10,7 @@ Set your Docker Hub user in `.env`:
 ```env
 DOCKER_USER=your-dockerhub-username
 TAG=latest
-PORT=8090
+PORT=8091
 ```
 
 Login and publish:

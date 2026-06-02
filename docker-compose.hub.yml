@@ -11,4 +11,4 @@ services:
       - PYTHONUNBUFFERED=1
       - API_URL=http://127.0.0.1:5000
     ports:
-      - "${PORT:-8090}:3000"
+      - "${PORT:-8091}:3000"
